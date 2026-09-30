@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TouchGrass</string>
+    <string name="home_placeholder">App limits will live here.</string>
+</resources>

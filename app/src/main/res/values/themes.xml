@@ -1,0 +1,4 @@
+<resources>
+    <!-- Only covers the window before Compose draws; all real theming is in Theme.kt -->
+    <style name="Theme.TouchGrass" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
