@@ -7,22 +7,31 @@ plugins {
 
 android {
     namespace = "dev.touchgrass.app"
-    // Compose 1.12 requires compiling against API 37; this does not change runtime behavior (see targetSdk)
     compileSdk {
         version = release(37) { minorApiLevel = 2 }
     }
 
     defaultConfig {
         applicationId = "dev.touchgrass.app"
-        // Built for one device (Pixel 10a on current GrapheneOS), so no backwards-compat code paths
         minSdk = 36
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = providers.gradleProperty("versionCode").orNull?.toInt() ?: 1
+        versionName = providers.gradleProperty("versionName").orNull ?: "0.0.0-dev"
+    }
+
+    val keystorePath = providers.environmentVariable("KEYSTORE_PATH").orNull
+    val releaseSigning = keystorePath?.let { path ->
+        signingConfigs.create("release") {
+            storeFile = file(path)
+            storePassword = providers.environmentVariable("KEYSTORE_PASSWORD").get()
+            keyAlias = providers.environmentVariable("KEY_ALIAS").get()
+            keyPassword = providers.environmentVariable("KEYSTORE_PASSWORD").get()
+        }
     }
 
     buildTypes {
         release {
+            signingConfig = releaseSigning
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))

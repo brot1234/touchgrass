@@ -49,7 +49,8 @@ It runs on one device: a Pixel 10a on the current GrapheneOS release.
 ## Release and distribution
 
 - The app is installed and updated with Obtainium from this repo's GitHub Releases.
-- Releases are built by GitHub Actions when a `v*` tag is pushed. `versionName` and `versionCode` come from the tag, and `versionCode` must always increase.
+- Releases are built by GitHub Actions (`.github/workflows/release.yml`) when a `vX.Y.Z` tag is pushed. `versionName` and `versionCode` come from the tag (`vX.Y.Z` → `X*10000 + Y*100 + Z`, so Y and Z stay below 100), and `versionCode` must always increase.
+- `app/build.gradle.kts` signs release builds only when `KEYSTORE_PATH` is set, so local release builds are unsigned.
 - Signing uses the GitHub secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD` and `KEY_ALIAS`. The keystore is never committed; `.gitignore` excludes `*.jks`, `*.keystore` and `keystore.properties`.
 
 License: GPL-3.0-or-later.
