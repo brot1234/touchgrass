@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import dev.touchgrass.app.monitor.Monitor
 import dev.touchgrass.app.permissions.Permissions
 import dev.touchgrass.app.ui.applist.AppListScreen
 import dev.touchgrass.app.ui.permissions.PermissionScreen
@@ -15,7 +16,10 @@ import dev.touchgrass.app.ui.permissions.PermissionScreen
 fun TouchGrassApp() {
     val context = LocalContext.current
     var missing by remember { mutableStateOf(Permissions.firstMissing(context)) }
-    val recheck = { missing = Permissions.firstMissing(context) }
+    val recheck = {
+        missing = Permissions.firstMissing(context)
+        Monitor.sync(context)
+    }
     LifecycleResumeEffect(Unit) {
         recheck()
         onPauseOrDispose {}

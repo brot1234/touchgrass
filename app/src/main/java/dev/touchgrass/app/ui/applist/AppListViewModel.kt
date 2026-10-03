@@ -7,6 +7,8 @@ import dev.touchgrass.app.R
 import dev.touchgrass.app.apps.LaunchableApp
 import dev.touchgrass.app.apps.LaunchableApps
 import dev.touchgrass.app.limits.LimitStore
+import dev.touchgrass.app.limits.isLimitReached
+import dev.touchgrass.app.monitor.Monitor
 import dev.touchgrass.app.usage.UsageCalculator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,8 +21,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
-data class AppUsage(val app: LaunchableApp, val usageMinutes: Long, val limitMinutes: Int?) {
-    val limitReached: Boolean get() = limitMinutes != null && usageMinutes >= limitMinutes
+data class AppUsage(val app: LaunchableApp, val usageMs: Long, val limitMinutes: Int?) {
+    val usageMinutes: Long get() = usageMs.milliseconds.inWholeMinutes
+    val limitReached: Boolean get() = limitMinutes != null && isLimitReached(usageMs, limitMinutes)
 }
 
 data class AppListState(
@@ -46,9 +49,15 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun setLimit(packageName: String, minutes: Int) = limitStore.set(packageName, minutes)
+    fun setLimit(packageName: String, minutes: Int) {
+        limitStore.set(packageName, minutes)
+        Monitor.sync(getApplication<Application>())
+    }
 
-    fun removeLimit(packageName: String) = limitStore.remove(packageName)
+    fun removeLimit(packageName: String) {
+        limitStore.remove(packageName)
+        Monitor.sync(getApplication<Application>())
+    }
 
     private fun loadSnapshot() = Snapshot(
         apps = LaunchableApps.load(getApplication<Application>(), iconSizePx),
@@ -57,7 +66,7 @@ class AppListViewModel(application: Application) : AndroidViewModel(application)
 
     private class Snapshot(val apps: List<LaunchableApp>, val usageMs: Map<String, Long>) {
         fun withLimits(limits: Map<String, Int>): List<AppUsage> = apps
-            .map { AppUsage(it, (usageMs[it.packageName] ?: 0L).milliseconds.inWholeMinutes, limits[it.packageName]) }
+            .map { AppUsage(it, usageMs[it.packageName] ?: 0L, limits[it.packageName]) }
             .sortedWith(compareBy<AppUsage> { it.limitMinutes == null }.thenBy { it.app.label.lowercase() })
     }
 }
