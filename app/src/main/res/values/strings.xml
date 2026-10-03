@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">TouchGrass</string>
-    <string name="home_placeholder">App limits will live here.</string>
+
+    <string name="perm_allow">Allow</string>
+    <string name="perm_open_settings">Open settings</string>
+    <string name="perm_usage_title">Allow usage access</string>
+    <string name="perm_usage_body">To see how long you use each app.</string>
+    <string name="perm_overlay_title">Allow display over other apps</string>
+    <string name="perm_overlay_body">To block apps when their time is up.</string>
+    <string name="perm_notifications_title">Allow notifications</string>
+    <string name="perm_notifications_body">For the silent notification while TouchGrass runs.</string>
+
+    <string name="usage_minutes">%1$d min</string>
 </resources>
