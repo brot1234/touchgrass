@@ -44,6 +44,7 @@ It runs on one device: a Pixel 10a on the current GrapheneOS release.
 ```bash
 ./gradlew installDebug       # build and install on the connected phone via adb
 ./gradlew assembleRelease    # release APK
+./gradlew testDebugUnitTest  # unit tests (domain logic only)
 ```
 
 ## Release and distribution

@@ -1,12 +1,10 @@
-package dev.touchgrass.app
+package dev.touchgrass.app.apps
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
 
 data class LaunchableApp(
     val packageName: String,
@@ -25,15 +23,8 @@ object LaunchableApps {
                 LaunchableApp(
                     packageName = info.activityInfo.packageName,
                     label = info.loadLabel(pm).toString(),
-                    icon = info.loadIcon(pm).toBitmap(iconSizePx).asImageBitmap(),
+                    icon = info.loadIcon(pm).toBitmap(iconSizePx, iconSizePx).asImageBitmap(),
                 )
             }
-    }
-
-    private fun Drawable.toBitmap(sizePx: Int): Bitmap {
-        val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
-        setBounds(0, 0, sizePx, sizePx)
-        draw(Canvas(bitmap))
-        return bitmap
     }
 }
