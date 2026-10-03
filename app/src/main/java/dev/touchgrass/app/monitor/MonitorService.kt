@@ -8,7 +8,7 @@ import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.PowerManager
-import android.util.Log
+import dev.touchgrass.app.block.AppBlocker
 import dev.touchgrass.app.limits.LimitStore
 import dev.touchgrass.app.limits.isLimitReached
 import dev.touchgrass.app.usage.UsageCalculator
@@ -22,13 +22,13 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-/** Polls the foreground app while the screen is on and detects when it reaches its limit. */
+/** Polls the foreground app while the screen is on and blocks it once it reaches its limit. */
 class MonitorService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var pollJob: Job? = null
     private lateinit var usageCalculator: UsageCalculator
     private lateinit var limitStore: LimitStore
-    private var lastReported: String? = null
+    private lateinit var blocker: AppBlocker
 
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -43,6 +43,7 @@ class MonitorService : Service() {
         super.onCreate()
         usageCalculator = UsageCalculator(this)
         limitStore = LimitStore(this)
+        blocker = AppBlocker(this)
         val screenEvents = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
@@ -67,7 +68,6 @@ class MonitorService : Service() {
     private fun startPolling() {
         if (pollJob?.isActive == true) return
         pollJob = scope.launch {
-            lastReported = null
             while (isActive) {
                 checkForeground()
                 delay(1.seconds)
@@ -80,10 +80,9 @@ class MonitorService : Service() {
         pollJob = null
     }
 
-    private fun checkForeground() {
-        val reached = foregroundAppOverLimit()
-        if (reached != null && reached != lastReported) onLimitReached(reached)
-        lastReported = reached
+    private suspend fun checkForeground() {
+        val overLimit = foregroundAppOverLimit() ?: return
+        blocker.block(overLimit)
     }
 
     private fun foregroundAppOverLimit(): String? {
@@ -91,13 +90,5 @@ class MonitorService : Service() {
         val foreground = usage.foregroundPackage ?: return null
         val limit = limitStore.all()[foreground] ?: return null
         return foreground.takeIf { isLimitReached(usage.usageMs[foreground] ?: 0L, limit) }
-    }
-
-    private fun onLimitReached(packageName: String) {
-        Log.i(TAG, "Limit reached: $packageName")
-    }
-
-    private companion object {
-        const val TAG = "TouchGrass"
     }
 }

@@ -26,8 +26,8 @@ It runs on one device: a Pixel 10a on the current GrapheneOS release.
 
 - A foreground service runs while the screen is on and polls `UsageStatsManager.queryEvents` about once a second. It works out the foreground app from `ACTIVITY_RESUMED` / `ACTIVITY_PAUSED` events.
 - Today's usage per app is computed from the raw events. Don't use `queryUsageStats` aggregates; they are unreliable.
-- When a limited app reaches its limit, TouchGrass launches its own full-screen block activity, which leads the user to the home screen.
-- Limits are stored locally (DataStore or Room). History for the overview goes in Room and is snapshotted periodically, because the system keeps usage events only for a short time.
+- When the foreground app reaches its limit, the service adds a full-screen `TYPE_APPLICATION_OVERLAY` window ("Time's up for <app>"). After about 2 seconds it starts the home intent while the overlay is still visible, then removes the overlay. The visible overlay is what allows the background activity start on Android 15+. There is no block activity and no bypass; reopening the app triggers the same thing again.
+- Limits are stored in SharedPreferences (package → minutes). History for the overview goes in Room and is snapshotted periodically, because the system keeps usage events only for a short time.
 
 ## Stack and versions
 

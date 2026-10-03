@@ -21,4 +21,6 @@
 
     <string name="monitor_channel_name">Monitoring</string>
     <string name="monitor_notification_title">TouchGrass is active</string>
+
+    <string name="block_title">Time\'s up for %1$s</string>
 </resources>
