@@ -7,7 +7,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-// minSdk 36 always supports dynamic (wallpaper-based) color, so there is no static fallback scheme
 @Composable
 fun TouchGrassTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
