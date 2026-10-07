@@ -12,7 +12,7 @@ class UsageCalculator(context: Context) {
 
     fun today(now: Long = System.currentTimeMillis()): UsageToday {
         val midnight = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        return ForegroundTime.calculate(queryEvents(midnight, now), midnight, now)
+        return ForegroundTime.calculate(queryEvents(midnight - LOOKBACK_MS, now), midnight, now)
     }
 
     private fun queryEvents(from: Long, to: Long): Sequence<UsageEvent> = sequence {
@@ -29,6 +29,11 @@ class UsageCalculator(context: Context) {
         UsageEvents.Event.ACTIVITY_PAUSED -> UsageEvent.Type.Paused
         UsageEvents.Event.ACTIVITY_STOPPED -> UsageEvent.Type.Stopped
         UsageEvents.Event.SCREEN_NON_INTERACTIVE, UsageEvents.Event.DEVICE_SHUTDOWN -> UsageEvent.Type.ScreenOff
+        UsageEvents.Event.SCREEN_INTERACTIVE -> UsageEvent.Type.ScreenOn
         else -> null
+    }
+
+    private companion object {
+        const val LOOKBACK_MS = 6 * 60 * 60 * 1000L
     }
 }

@@ -55,4 +55,22 @@ class ForegroundTimeTest {
         assertEquals(100L, result.usageMs["insta"])
         assertNull(result.foregroundPackage)
     }
+
+    @Test
+    fun `app still open after screen off and on keeps counting`() {
+        val result = calculate(
+            event(Type.Resumed, 100),
+            event(Type.ScreenOff, 200, pkg = "android", cls = ""),
+            event(Type.ScreenOn, 300, pkg = "android", cls = ""),
+            event(Type.Paused, 700),
+        )
+        assertEquals(500L, result.usageMs["insta"])
+    }
+
+    @Test
+    fun `app opened before the start counts from the start and is in the foreground`() {
+        val result = ForegroundTime.calculate(sequenceOf(event(Type.Resumed, -500)), from = 0, to = 300)
+        assertEquals(300L, result.usageMs["insta"])
+        assertEquals("insta", result.foregroundPackage)
+    }
 }

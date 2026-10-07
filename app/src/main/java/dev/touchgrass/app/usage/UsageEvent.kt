@@ -6,7 +6,7 @@ data class UsageEvent(
     val className: String,
     val time: Long,
 ) {
-    enum class Type { Resumed, Paused, Stopped, ScreenOff }
+    enum class Type { Resumed, Paused, Stopped, ScreenOff, ScreenOn }
 }
 
 data class UsageToday(
